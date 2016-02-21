@@ -5,7 +5,7 @@ import (
 	"github.com/fhs/gompd/mpd"
 	"math/rand"
 	"os"
-	"strings"
+	"path/filepath"
 	"time"
 )
 
@@ -20,7 +20,7 @@ func shuffle(arr []mpd.Attrs) {
 }
 
 func GetAlbumDir(song string) string {
-	return strings.SplitAfterN(song, "/", 2)[0]
+	return filepath.Dir(song)
 }
 
 func exists(path string) bool {
