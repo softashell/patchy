@@ -52,28 +52,7 @@ func getCover(ctx *web.Context, album string) string {
 }
 
 func getSong(ctx *web.Context, song string) string {
-	//Open the file
-	f, err := os.Open("static/queue/" + song)
-	if err != nil {
-		return "Error reading file!\n"
-	}
-
-	//Get MIME
-	r, err := ioutil.ReadAll(f)
-	if err != nil {
-		return "Error reading file!\n"
-	}
-	mime := http.DetectContentType(r)
-
-	_, err = f.Seek(0, 0)
-	if err != nil {
-		return "Error reading the file\n"
-	}
-	//This is weird - ServeContent supposedly handles MIME setting
-	//But the Webgo content setter needs to be used too
-	//In addition, ServeFile doesn't work, ServeContent has to be used
-	ctx.ContentType(mime)
-	http.ServeContent(ctx.ResponseWriter, ctx.Request, "static/queue/"+song, time.Now(), f)
+	http.ServeFile(ctx.ResponseWriter, ctx.Request, "static/queue/"+song)
 	return ""
 }
 
