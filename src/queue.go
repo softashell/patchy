@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"strconv"
+	"time"
 )
 
 type qsong struct {
@@ -14,6 +17,8 @@ type qsong struct {
 }
 
 type queue struct {
+	// Library
+	library *library
 	// Queue.
 	queue []*qsong
 	//Current playing song
@@ -29,8 +34,9 @@ type queue struct {
 }
 
 //Create a new queue
-func newQueue() *queue {
+func newQueue(l *library) *queue {
 	return &queue{
+		library:     l,
 		queue:       make([]*qsong, 0),
 		CFile:       1,
 		np:          nil,
@@ -42,23 +48,22 @@ func newQueue() *queue {
 //Consumes and returns the first value in the queue
 //Precondition: queue has at least one item in it
 func (q *queue) consume() *qsong {
-	/*
-		if len(q.Queue) < 1 {
-			return nil, errors.New("Nothing in queue!")
-		}
-	*/
 	s := q.queue[0]
-	if len(q.queue) > 1 {
-		q.queue = q.queue[1:]
-	} else {
-		//There has to be a better way of doing this
-		q.queue = make([]*qsong, 0)
+
+	if len(q.queue) < 1 {
+		fmt.Println("Nothing in queue! Adding random song!")
+
+		q.addRandom()
 	}
+
+	q.queue = q.queue[1:]
+
 	if q.CFile == 1 {
 		q.CFile = 2
 	} else {
 		q.CFile = 1
 	}
+
 	q.np = s
 	return s
 }
@@ -66,6 +71,25 @@ func (q *queue) consume() *qsong {
 //Adds a new item to the queue
 func (q *queue) add(s *qsong) {
 	q.queue = append(q.queue, s)
+}
+
+func (q *queue) addRandom() {
+	fmt.Println("Adding random song")
+
+	rand.Seed(time.Now().UnixNano())
+
+	r := rand.Intn(len(q.library.library))
+	s := q.library.library[r]
+
+	fmt.Println("Chose song", r)
+
+	length, err := strconv.Atoi(s["Length"])
+
+	if err != nil {
+		length = 0
+	}
+
+	q.add(&qsong{s["Title"], s["Album"], s["Artist"], length, s["file"]})
 }
 
 //Transcodes the next appropriate song
@@ -89,10 +113,10 @@ func (q *queue) transcodeNext() {
 	//if there is only one thing in the queue
 	//other wise transcodes occur afterwards(since you want to transcodein background)
 	if q.CFile == 1 {
-		fmt.Println("Renaming Song to ns2.mp3")
+		fmt.Println("Renaming Song to ns2.opus")
 		os.Rename("static/queue/next.opus", "static/queue/ns2.opus")
 	} else {
-		fmt.Println("Renaming Song to ns1.mp3")
+		fmt.Println("Renaming Song to ns1.opus")
 		os.Rename("static/queue/next.opus", "static/queue/ns1.opus")
 	}
 	q.transcoding = false

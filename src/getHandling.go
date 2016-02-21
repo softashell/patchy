@@ -13,7 +13,9 @@ import (
 
 func getCover(ctx *web.Context, album string) string {
 	dir := musicDir + "/" + album
+
 	cover := "static/image/missing.png"
+
 	//Do various searches -- Optimally this should do a full traversal and find one of these names
 	if exists(dir + "/cover.jpg") {
 		cover = dir + "/cover.jpg"
@@ -95,6 +97,7 @@ func getNowPlaying(ctx *web.Context, utaChan chan string, reChan chan string, qu
 		song["Artist"] = np.Artist
 		song["Album"] = np.Album
 		song["file"] = np.File
+		song["Cover"] = GetAlbumDir(np.File)
 		song["Time"] = strconv.Itoa(np.Length)
 
 		song["ctime"] = ctime
@@ -109,6 +112,7 @@ func getNowPlaying(ctx *web.Context, utaChan chan string, reChan chan string, qu
 		song["ctime"] = "0"
 		song["cfile"] = "1"
 	}
+
 	song["listeners"] = strconv.Itoa(listeners)
 
 	jsonMsg, _ := json.Marshal(song)
@@ -120,7 +124,7 @@ func getLibrary(ctx *web.Context, subset []mpd.Attrs) string {
 	return string(jsonMsg)
 }
 
-func getQueue(ctx *web.Context, q *queue) string {
+func getQueue(ctx *web.Context, q *queue, h *hub, utaChan chan string) string {
 	//Let the song handler return a JSONify'd queue
 	jsonMsg, _ := json.Marshal(q.queue)
 	return string(jsonMsg)

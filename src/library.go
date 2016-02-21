@@ -32,6 +32,7 @@ func newLibrary() *library {
 		fmt.Println("Error: could not connect to MPD, exiting")
 		os.Exit(1)
 	}
+
 	shuffle(songs)
 
 	return &library{
@@ -41,7 +42,13 @@ func newLibrary() *library {
 
 //returns a small selection of songs for initial display
 func (l *library) selection() []mpd.Attrs {
-	return l.library[:15]
+	songs := l.library[:15]
+
+	for i, song := range songs {
+		songs[i]["Cover"] = GetAlbumDir(song["file"])
+	}
+
+	return songs
 }
 
 //Searches for a request and returns the first song which matches
@@ -66,6 +73,7 @@ func (l *library) asyncSearch(req string) []mpd.Attrs {
 	//There has to be a faster way to do this >.>
 	for _, song := range l.library {
 		if strings.Contains(song["Title"], req) || strings.Contains(song["Album"], req) || strings.Contains(song["Artist"], req) {
+			song["Cover"] = GetAlbumDir(song["file"])
 			res = append(res, song)
 			if len(res) == 15 {
 				break

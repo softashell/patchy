@@ -41,10 +41,10 @@ func main() {
 	h := newHub()
 	go h.run()
 
-	q := newQueue()
-
 	l := newLibrary()
 	subset := l.selection()
+
+	q := newQueue(l)
 
 	//Control song transitions -- During this time, update the websockets and notify clients
 	utaChan := make(chan string)
@@ -82,7 +82,7 @@ func main() {
 
 	//Returns the current queue
 	web.Get("/curQueue", func(ctx *web.Context) string {
-		return getQueue(ctx, q)
+		return getQueue(ctx, q, h, utaChan)
 	})
 
 	//Returns the current queue
