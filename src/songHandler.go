@@ -71,13 +71,6 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 		//If a song just finished, load in the next thing from queue if available
 		if msg == "done" {
 			q.playing = false
-			if len(q.queue) < 1 {
-				q.addRandom()
-				song := q.queue[0]
-				msg := map[string]string{"cmd": "queue", "Title": song.Title, "Artist": song.Artist}
-				jsonMsg, _ := json.Marshal(msg)
-				h.broadcast <- []byte(jsonMsg)
-			}
 
 			if len(q.queue) > 0 {
 				go func() {
