@@ -117,6 +117,7 @@ $(document).ready(function(){
             fillSearchRes(data)
         });
     });
+    /*
     var form = document.getElementById("ulform");
     var fs = document.getElementById("upload-file");
     form.onsubmit = function(event) {
@@ -143,6 +144,7 @@ $(document).ready(function(){
         form.submit();
         $("#ulform").submit();
     })
+    */
 
     //Initialize Volume stuff
     var slider = $('#slider');
