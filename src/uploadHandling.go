@@ -78,7 +78,10 @@ func handleUpload(ctx *web.Context, l *library) string {
 	if !dir.FileInfo().IsDir() {
 		return "The zip should contain a single directory!"
 	}
-	os.Mkdir(musicDir+"/"+name, dir.Mode())
+
+	uploadDir := musicDir + "/uploads/"
+
+	os.Mkdir(uploadDir+name, dir.Mode())
 
 	for _, song := range r.Reader.File[1:] {
 		zipped, err := song.Open()
@@ -90,7 +93,7 @@ func handleUpload(ctx *web.Context, l *library) string {
 		defer zipped.Close()
 
 		// get the individual file name and extract the current directory
-		path := filepath.Join(musicDir, "/", song.Name)
+		path := filepath.Join(uploadDir, song.Name)
 		if song.FileInfo().IsDir() {
 			os.MkdirAll(path, song.Mode())
 			fmt.Println("Creating directory", path)
@@ -98,21 +101,21 @@ func handleUpload(ctx *web.Context, l *library) string {
 			writer, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, song.Mode())
 
 			if err != nil {
-				os.Remove(musicDir + "/" + name)
+				os.Remove(uploadDir + name)
 				return "Couldn't unzip file!"
 			}
 
 			defer writer.Close()
 
 			if _, err = io.Copy(writer, zipped); err != nil {
-				os.Remove(musicDir + "/" + name)
+				os.Remove(uploadDir + name)
 				return "Couldn't unzip file!"
 			}
 		}
 	}
 	if err = l.update(); err != nil {
 		fmt.Println(err)
-		os.Remove(musicDir + "/" + name)
+		os.Remove(uploadDir + name)
 		return "Couldn't update library"
 	}
 	return "Added!"
