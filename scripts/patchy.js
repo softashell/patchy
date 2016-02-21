@@ -12,7 +12,7 @@ $(document).ready(function(){
     $.get("/np", function(data) {
         var song = JSON.parse(data)
         console.log(song)
-        $("#npArt").attr("src", "/art/" + song["file"].split("/")[0])
+        $("#npArt").attr("src", "/art/" + song["Cover"])
         $("#npSong").text(song["Title"])
         $("#npArtist").text(song["Artist"])
         $("#npAlbum").text(song["Album"])
@@ -33,7 +33,7 @@ $(document).ready(function(){
         $("#player-1").jPlayer({
             ready: function () {
             $(this).jPlayer("setMedia", {
-                mp3: "/queue/ns" + cfile + ".mp3?" + randString()
+                mp3: "/queue/ns" + cfile + ".opus?" + randString()
             }).jPlayer("play", ctime);
             },
             supplied: "mp3",
@@ -41,7 +41,7 @@ $(document).ready(function(){
             volume: 0.3
         });
 
-        console.log("Initialized and started Player1 using file /queue/ns" + cfile + ".mp3")
+        console.log("Initialized and started Player1 using file /queue/ns" + cfile + ".opus")
 
         $("#songProgress").css("width", (100 * parseInt(song["ctime"])/parseInt(song["Time"])).toString() + "%")
         songProg = window.setInterval(updateSong, 1000);
@@ -205,7 +205,7 @@ function fillSearchRes(data) {
             }     
             album = song["Album"].substring(0,i) + "..."
         }
-        $(".search-results").append('<div title="' + song["Title"] + '" album="' + song["Album"] + '" artist="' + song["Artist"] + '" class="result"><img alt="Album art" src="/art/' + song["file"].split("/")[0] + '"><div><p><strong>' + title + '</strong></p><p>by <strong>' + artist + '</strong></p><p>from <strong>' + album +' </strong></p><button class="req-button btn btn-primary btn-block">Request</button></div></div>')
+        $(".search-results").append('<div title="' + song["Title"] + '" album="' + song["Album"] + '" artist="' + song["Artist"] + '" class="result"><img alt="Album art" src="/art/' + song["Cover"] + '"><div><p><strong>' + title + '</strong></p><p>by <strong>' + artist + '</strong></p><p>from <strong>' + album +' </strong></p><button class="req-button btn btn-primary btn-block">Request</button></div></div>')
     }); 
     $(".req-button").click(function() {
             var req = {}
@@ -240,13 +240,13 @@ function endSong() {
     }
     $("#cs").attr("val", cs.toString())
 
-    var cf = "/queue/ns" + cs.toString() + ".mp3?" + randString()
+    var cf = "/queue/ns" + cs.toString() + ".opus?" + randString()
     
     $("#player-1").jPlayer("clearMedia")
     $("#player-1").jPlayer("setMedia", {
             mp3: cf
     });
-    console.log("Set Player1 to load song /queue/ns" + cs.toString() + ".mp3 in the background")
+    console.log("Set Player1 to load song /queue/ns" + cs.toString() + ".opus in the background")
     window.clearInterval(songProg)
 
     $("#curTime").text(secToMin(stime))
