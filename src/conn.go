@@ -1,9 +1,9 @@
 package main
 
 import (
-	"golang.org/x/net/websocket"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/net/websocket"
 )
 
 type connection struct {
