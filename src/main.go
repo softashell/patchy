@@ -1,11 +1,11 @@
 package main
 
 import (
-	"code.google.com/p/go.net/websocket"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/hoisie/web"
+	"golang.org/x/net/websocket"
 	"os"
 )
 
