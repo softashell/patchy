@@ -90,10 +90,10 @@ func (q *queue) transcodeNext() {
 	//other wise transcodes occur afterwards(since you want to transcodein background)
 	if q.CFile == 1 {
 		fmt.Println("Renaming Song to ns2.mp3")
-		os.Rename("static/queue/next.mp3", "static/queue/ns2.mp3")
+		os.Rename("static/queue/next.opus", "static/queue/ns2.opus")
 	} else {
 		fmt.Println("Renaming Song to ns1.mp3")
-		os.Rename("static/queue/next.mp3", "static/queue/ns1.mp3")
+		os.Rename("static/queue/next.opus", "static/queue/ns1.opus")
 	}
 	q.transcoding = false
 }
