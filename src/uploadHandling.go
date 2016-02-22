@@ -43,15 +43,12 @@ func handleUpload(ctx *web.Context, l *library) string {
 	}
 
 	//Get MIME
+	// FIXME: Everything is plaintext
 	reader, err := ioutil.ReadAll(f)
 	if err != nil {
 		return "Error reading file!"
 	}
 	mime := http.DetectContentType(reader)
-	if mime != "application/zip" {
-		fmt.Println(mime)
-		//return "Make sure this is a ZIP file!"
-	}
 
 	_, err = f.Seek(0, 0)
 	if err != nil {
@@ -65,6 +62,34 @@ func handleUpload(ctx *web.Context, l *library) string {
 	f.Close()
 	defer os.Remove("temp/" + name)
 
+	uploadDir := musicDir + "/uploads/"
+
+	switch mime {
+	case "application/zip":
+		{
+			res := handleUploadZip(uploadDir, name)
+
+			if len(res) > 0 {
+				fmt.Println(res)
+				return res
+			}
+		}
+	default:
+		{
+			fmt.Println("Upload mime:", mime)
+		}
+	}
+
+	if err = l.update(); err != nil {
+		fmt.Println(err)
+		os.Remove(uploadDir + name)
+		return "Couldn't update library"
+	}
+
+	return "Added!"
+}
+
+func handleUploadZip(uploadDir string, name string) string {
 	r, err := zip.OpenReader("temp/" + name)
 	if err != nil {
 		os.Remove("temp/" + name)
@@ -78,8 +103,6 @@ func handleUpload(ctx *web.Context, l *library) string {
 	if !dir.FileInfo().IsDir() {
 		return "The zip should contain a single directory!"
 	}
-
-	uploadDir := musicDir + "/uploads/"
 
 	os.Mkdir(uploadDir+name, dir.Mode())
 
@@ -113,10 +136,6 @@ func handleUpload(ctx *web.Context, l *library) string {
 			}
 		}
 	}
-	if err = l.update(); err != nil {
-		fmt.Println(err)
-		os.Remove(uploadDir + name)
-		return "Couldn't update library"
-	}
-	return "Added!"
+
+	return ""
 }
