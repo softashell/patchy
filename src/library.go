@@ -29,7 +29,7 @@ func newLibrary() *library {
 
 	songs, err := conn.ListAllInfo("/")
 	if err != nil {
-		fmt.Println("Error: could not connect to MPD, exiting")
+		fmt.Println("Error: could not list MPD library, exiting")
 		os.Exit(1)
 	}
 
