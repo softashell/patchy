@@ -23,12 +23,14 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 		if msg == "ns" && !q.playing {
 			q.playing = true
 			var ns *qsong
+
 			//We'll want to make this concurrent since otherwise any requests which come in during the meanwhile will get pushed on wait
 			//Needs some thought as to whether or not this is the best way to do stuff
 			go func() {
 				//Wait until all transcoding is done
 				for q.transcoding {
 				}
+
 				//Precondition: q.queue has at least 1 item in it.
 				//Consume item in queue, if there's anything left, initiate a transcode
 				ns = q.consume()
@@ -38,22 +40,17 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 				jsonMsg, _ := json.Marshal(msg)
 				h.broadcast <- []byte(jsonMsg)
 				fmt.Println("Sent done msg to clients")
+
 				//Wait 4 seconds for clients to load the next song if necessary, then resume next song
-				time.Sleep(4000 * time.Millisecond)
+				time.Sleep(4 * time.Second)
 				fmt.Println("Sending NS to clients")
+
 				//Tell clients to begin the song
 				msg = map[string]string{"cmd": "NS", "Title": ns.Title, "Artist": ns.Artist, "Album": ns.Album, "Cover": "/art/" + GetAlbumDir(ns.File), "Time": strconv.Itoa(ns.Length)}
 				jsonMsg, _ = json.Marshal(msg)
 				h.broadcast <- []byte(jsonMsg)
-				go timer(ns.Length, utaChan, ctChan)
 
-				if len(q.queue) < 1 {
-					q.addRandom()
-					song := q.queue[0]
-					msg := map[string]string{"cmd": "queue", "Title": song.Title, "Artist": song.Artist}
-					jsonMsg, _ := json.Marshal(msg)
-					h.broadcast <- []byte(jsonMsg)
-				}
+				go timer(ns.Length, utaChan, ctChan)
 
 				if len(q.queue) > 0 {
 					fmt.Println("Queue has more than one item, performing next transcode in background")
