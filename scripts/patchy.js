@@ -23,28 +23,34 @@ $(document).ready(function(){
         var cfile = parseInt(song["cfile"])
         var listeners = parseInt(song["listeners"])
         $("#nl").text(listeners)
+        
         if(listeners == 1) {
             $("#ltext").text("listener")
         }
-        if(stime != 0){
-            playing = true
-        }
+
         //Load init jplayer
         $("#player-1").jPlayer({
-            ready: function () {
-            $(this).jPlayer("setMedia", {
-                mp3: "/queue/ns" + cfile + ".opus?" + randString()
-            }).jPlayer("play", ctime);
-            },
-            supplied: "mp3",
-            preload: "auto",
-            volume: 0.3
+          supplied: "oga",
+          preload: "auto",
+          volume: 1.0
         });
 
-        console.log("Initialized and started Player1 using file /queue/ns" + cfile + ".opus")
+        console.log("Initialized Player1")
+
+        if(stime != 0 && ctime < stime) {
+          playing = true
+          
+          $("#player-1").jPlayer("setMedia", {
+            oga: "/queue/ns" + cfile + ".opus?" + randString()
+          });
+
+          $("#player-1").jPlayer("play")
+        }
 
         $("#songProgress").css("width", (100 * parseInt(song["ctime"])/parseInt(song["Time"])).toString() + "%")
+
         songProg = window.setInterval(updateSong, 1000);
+
         $("#cs").attr("val", cfile)
     });
 
@@ -152,7 +158,7 @@ $(document).ready(function(){
         slider.slider({
         range: "min",
         min: 1,
-        value: 35,
+        value: 100,
  
         slide: function(event, ui) {
  
@@ -246,7 +252,7 @@ function endSong() {
     
     $("#player-1").jPlayer("clearMedia")
     $("#player-1").jPlayer("setMedia", {
-            mp3: cf
+            oga: cf
     });
     console.log("Set Player1 to load song /queue/ns" + cs.toString() + ".opus in the background")
     window.clearInterval(songProg)
