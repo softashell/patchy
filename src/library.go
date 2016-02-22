@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fhs/gompd/mpd"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -17,19 +18,18 @@ type library struct {
 
 //Create a new queue
 func newLibrary() *library {
-	var conn *mpd.Client
-
 	fmt.Println("Connecting to MPD")
+
 	conn, err := mpd.Dial("tcp", "127.0.0.1:6600")
 	if err != nil {
-		fmt.Println("Error: could not connect to MPD, exiting")
+		fmt.Println("Error: could not connect to MPD, exiting.", err.Error())
 		os.Exit(1)
 	}
 	defer conn.Close()
 
 	songs, err := conn.ListAllInfo("/")
 	if err != nil {
-		fmt.Println("Error: could not list MPD library, exiting")
+		fmt.Println("Error: could not list MPD library, exiting.", err.Error())
 		os.Exit(1)
 	}
 
@@ -70,16 +70,24 @@ func (l *library) reqSearch(title string, album string, artist string) (*qsong, 
 func (l *library) asyncSearch(req string) []mpd.Attrs {
 	res := make([]mpd.Attrs, 0)
 
+	req = strings.ToLower(req)
+
 	//There has to be a faster way to do this >.>
 	for _, song := range l.library {
-		if strings.Contains(song["Title"], req) || strings.Contains(song["Album"], req) || strings.Contains(song["Artist"], req) {
+		artist := strings.ToLower(song["Artist"])
+		title := strings.ToLower(song["Title"])
+		album := strings.ToLower(song["Album"])
+		file := strings.ToLower(song["file"])
+
+		if strings.Contains(title, req) || strings.Contains(album, req) || strings.Contains(artist, req) || strings.Contains(file, req) {
 			song["Cover"] = GetAlbumDir(song["file"])
 			res = append(res, song)
-			if len(res) == 15 {
+			if len(res) == 90 {
 				break
 			}
 		}
 	}
+
 	return res
 }
 
@@ -111,4 +119,17 @@ func (l *library) update() error {
 
 	l.library = songs
 	return nil
+}
+
+func (l *library) getRandomSong() mpd.Attrs {
+	fmt.Println("Getting random song")
+
+	rand.Seed(time.Now().UnixNano())
+
+	total := len(l.library)
+
+	r := rand.Intn(total)
+	s := l.library[r]
+
+	return s
 }

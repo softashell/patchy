@@ -44,7 +44,7 @@ func main() {
 	l := newLibrary()
 	subset := l.selection()
 
-	q := newQueue(l)
+	q := newQueue()
 
 	//Control song transitions -- During this time, update the websockets and notify clients
 	utaChan := make(chan string)
@@ -94,7 +94,7 @@ func main() {
 }
 
 func startUp() {
-	os.Remove("static/queue/ns1.mp3")
-	os.Remove("static/queue/ns2.mp3")
-	os.Remove("static/queue/next.mp3")
+	os.Remove("static/queue/ns1.opus")
+	os.Remove("static/queue/ns2.opus")
+	os.Remove("static/queue/next.opus")
 }

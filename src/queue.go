@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
-	"strconv"
-	"time"
 )
 
 type qsong struct {
@@ -17,8 +14,6 @@ type qsong struct {
 }
 
 type queue struct {
-	// Library
-	library *library
 	// Queue.
 	queue []*qsong
 	//Current playing song
@@ -34,9 +29,8 @@ type queue struct {
 }
 
 //Create a new queue
-func newQueue(l *library) *queue {
+func newQueue() *queue {
 	return &queue{
-		library:     l,
 		queue:       make([]*qsong, 0),
 		CFile:       1,
 		np:          nil,
@@ -48,15 +42,18 @@ func newQueue(l *library) *queue {
 //Consumes and returns the first value in the queue
 //Precondition: queue has at least one item in it
 func (q *queue) consume() *qsong {
-	s := q.queue[0]
-
 	if len(q.queue) < 1 {
-		fmt.Println("Nothing in queue! Adding random song!")
-
-		q.addRandom()
+		fmt.Println("Nothing in queue! Adding random songs!")
+		//	q.addRandom(1)
 	}
 
-	q.queue = q.queue[1:]
+	s := q.queue[0]
+	if len(q.queue) > 1 {
+		q.queue = q.queue[1:]
+	} else {
+		//There has to be a better way of doing this
+		q.queue = make([]*qsong, 0)
+	}
 
 	if q.CFile == 1 {
 		q.CFile = 2
@@ -73,25 +70,6 @@ func (q *queue) add(s *qsong) {
 	q.queue = append(q.queue, s)
 }
 
-func (q *queue) addRandom() {
-	fmt.Println("Adding random song")
-
-	rand.Seed(time.Now().UnixNano())
-
-	r := rand.Intn(len(q.library.library))
-	s := q.library.library[r]
-
-	fmt.Println("Chose song", r)
-
-	length, err := strconv.Atoi(s["Length"])
-
-	if err != nil {
-		length = 0
-	}
-
-	q.add(&qsong{s["Title"], s["Album"], s["Artist"], length, s["file"]})
-}
-
 //Transcodes the next appropriate song
 func (q *queue) transcodeNext() {
 	//Need a better way of doing this -- perhaps transfer
@@ -102,7 +80,7 @@ func (q *queue) transcodeNext() {
 	}
 	q.pt = q.queue[0].File
 
-	fmt.Println("Transcoding Song: ", q.queue[0].File)
+	fmt.Println("Transcoding Song:", q.queue[0].File)
 	//We want to set this in whatever function calls transcodeNext because this
 	//function is always called as a goroutine
 	//q.transcoding = true
