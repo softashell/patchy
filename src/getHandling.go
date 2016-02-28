@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"github.com/fhs/gompd/mpd"
 	"github.com/hoisie/web"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 )
@@ -34,14 +36,53 @@ func getCover(ctx *web.Context, album string) string {
 		}
 	}
 
+	//Open the file
+	f, err := os.Open(cover)
+	if err != nil {
+		return "Error opening file!\n"
+	}
+	defer f.Close()
+
+	//Get MIME
+	r, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "Error reading file!\n"
+	}
+
+	mime := http.DetectContentType(r)
+
+	//This is weird - ServeContent supposedly handles MIME setting
+	//But the Webgo content setter needs to be used too
+	ctx.ContentType(mime)
+
 	http.ServeFile(ctx.ResponseWriter, ctx.Request, cover)
 
 	return ""
 }
 
 func getSong(ctx *web.Context, song string) string {
-	http.ServeFile(ctx.ResponseWriter, ctx.Request, "static/queue/"+song)
+	file := "static/queue/" + song
 
+	//Open the file
+	f, err := os.Open(file)
+	if err != nil {
+		return "Error opening file!\n"
+	}
+	defer f.Close()
+
+	//Get MIME
+	r, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "Error reading file!\n"
+	}
+
+	mime := http.DetectContentType(r)
+
+	//This is weird - ServeContent supposedly handles MIME setting
+	//But the Webgo content setter needs to be used too
+	ctx.ContentType(mime)
+
+	http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 	return ""
 }
 
