@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type qsong struct {
@@ -26,16 +27,19 @@ type queue struct {
 	playing bool
 	//Previously transcoded file -- Used to prevent dupes
 	pt string
+	//Library
+	l *library
 }
 
 //Create a new queue
-func newQueue() *queue {
+func newQueue(library *library) *queue {
 	return &queue{
 		queue:       make([]*qsong, 0),
 		CFile:       1,
 		np:          nil,
 		transcoding: false,
 		pt:          "",
+		l:           library,
 	}
 }
 
@@ -43,11 +47,11 @@ func newQueue() *queue {
 //Precondition: queue has at least one item in it
 func (q *queue) consume() *qsong {
 	if len(q.queue) < 1 {
-		fmt.Println("Nothing in queue! Adding random songs!")
-		//	q.addRandom(1)
+		fmt.Println("Nothing left in queue!")
 	}
 
 	s := q.queue[0]
+
 	if len(q.queue) > 1 {
 		q.queue = q.queue[1:]
 	} else {
@@ -62,29 +66,64 @@ func (q *queue) consume() *qsong {
 	}
 
 	q.np = s
+
 	return s
 }
 
 //Adds a new item to the queue
 func (q *queue) add(s *qsong) {
+	fmt.Println("Added:", s.File)
+
 	q.queue = append(q.queue, s)
+}
+
+// Gets random song from library, and adds it to queue
+func (q *queue) addRandomSongs(count int) []qsong {
+	fmt.Println("Adding", count, "random songs!")
+
+	songs := []qsong{}
+
+	for i := 0; i < count; i++ {
+		song := q.l.getRandomSong()
+
+		// TODO: Check for dupes
+
+		st, err := strconv.Atoi(song["Time"])
+		if err != nil {
+			fmt.Println("Could not convert time to int for", song["file"])
+			continue
+		}
+
+		songs = append(songs, qsong{song["Title"], song["Album"], song["Artist"], st, song["file"]})
+	}
+
+	for _, song := range songs {
+		q.add(&song)
+	}
+
+	return songs
 }
 
 //Transcodes the next appropriate song
 func (q *queue) transcodeNext() {
+	song := q.queue[0]
+
 	//Need a better way of doing this -- perhaps transfer
 	//From a nontranscoded queue to a transcoded queue?
-	if q.pt == q.queue[0].File {
-		fmt.Println("This song has already been transcoded!")
+	if q.pt == song.File {
+		fmt.Println("This song has already been transcoded!", song.File)
 		return
 	}
-	q.pt = q.queue[0].File
 
-	fmt.Println("Transcoding Song:", q.queue[0].File)
+	q.pt = song.File
+
+	fmt.Println("Transcoding Song:", song.File)
+
 	//We want to set this in whatever function calls transcodeNext because this
 	//function is always called as a goroutine
 	//q.transcoding = true
-	transcode(musicDir + "/" + q.queue[0].File)
+	transcode(musicDir + "/" + song.File)
+
 	//Rename to opposite of current file, since the clients will be told to go
 	//to the next song after this
 	//Transcodes will happen BEFORE consumes(need to create the file for client use)
@@ -97,5 +136,6 @@ func (q *queue) transcodeNext() {
 		fmt.Println("Renaming Song to ns1.opus")
 		os.Rename("static/queue/next.opus", "static/queue/ns1.opus")
 	}
+
 	q.transcoding = false
 }

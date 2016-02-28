@@ -23,6 +23,10 @@ func GetAlbumDir(song string) string {
 	return filepath.Dir(song)
 }
 
+func GetFileName(song string) string {
+	return filepath.Base(song)
+}
+
 func exists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {

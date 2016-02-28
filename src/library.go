@@ -122,8 +122,6 @@ func (l *library) update() error {
 }
 
 func (l *library) getRandomSong() mpd.Attrs {
-	fmt.Println("Getting random song")
-
 	rand.Seed(time.Now().UnixNano())
 
 	total := len(l.library)

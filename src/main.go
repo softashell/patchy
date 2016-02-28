@@ -44,7 +44,7 @@ func main() {
 	l := newLibrary()
 	subset := l.selection()
 
-	q := newQueue()
+	q := newQueue(l)
 
 	//Control song transitions -- During this time, update the websockets and notify clients
 	utaChan := make(chan string)

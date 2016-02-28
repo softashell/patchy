@@ -17,6 +17,7 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 	ctChan := make(chan int)
 	q.playing = false
 	lastTime := 0
+	stalled := false
 	for msg := range utaChan {
 		fmt.Println(msg)
 		//Trigger this if there is a new song to be played
@@ -69,10 +70,40 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 		if msg == "done" {
 			q.playing = false
 
-			if len(q.queue) > 0 {
+			if len(q.queue) > 2 {
+				// We have more than 2 song in queue
 				go func() {
 					utaChan <- "ns"
 				}()
+			} else {
+				if len(q.queue) < 1 {
+					// Player was stopped because it didn't have any songs in queue
+					stalled = true
+				}
+
+				// After current song ends it will try to keep at least one song playing and one more in queue
+				added := q.addRandomSongs(2 - len(q.queue))
+
+				// Broadcast added songs
+				for _, song := range added {
+					msg := map[string]string{"cmd": "queue", "Title": song.Title, "Artist": song.Artist}
+					jsonMsg, _ := json.Marshal(msg)
+					h.broadcast <- []byte(jsonMsg)
+				}
+
+				if len(q.queue) >= 1 {
+					if stalled {
+						// Begin transcoding first song
+						q.transcoding = true
+						q.transcodeNext()
+
+						stalled = false
+					}
+
+					go func() {
+						utaChan <- "ns"
+					}()
+				}
 			}
 		}
 
@@ -85,7 +116,6 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 				reChan <- strconv.Itoa(lastTime)
 			}
 		}
-
 		/*
 			if msg == "queue" {
 				jsonMsg, err := json.Marshal(q.queue)
