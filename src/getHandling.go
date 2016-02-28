@@ -5,6 +5,7 @@ import (
 	"github.com/fhs/gompd/mpd"
 	"github.com/hoisie/web"
 	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
@@ -13,15 +14,24 @@ func getCover(ctx *web.Context, album string) string {
 
 	cover := "static/image/missing.png"
 
-	//Do various searches -- Optimally this should do a full traversal and find one of these names
-	if exists(dir + "/cover.jpg") {
-		cover = dir + "/cover.jpg"
-	} else if exists(dir + "/cover.png") {
-		cover = dir + "/cover.png"
-	} else if exists(dir + "/folder.png") {
-		cover = dir + "/folder.png"
-	} else if exists(dir + "/folder.jpg") {
-		cover = dir + "/folder.jpg"
+	cover_files := [...]string{
+		"cover.jpg",
+		"cover.png",
+		"AlbumArt.jpg",
+		"AlbumArt.png",
+		"folder.jpg",
+		"folder.png",
+	}
+
+	// Try the most generic album art names and return first existing match
+	for _, filename := range cover_files {
+		file := filepath.Join(dir, filename)
+
+		if exists(file) {
+			cover = file
+
+			break
+		}
 	}
 
 	http.ServeFile(ctx.ResponseWriter, ctx.Request, cover)
