@@ -4,11 +4,8 @@ import (
 	"encoding/json"
 	"github.com/fhs/gompd/mpd"
 	"github.com/hoisie/web"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
-	"time"
 )
 
 func getCover(ctx *web.Context, album string) string {
@@ -26,39 +23,22 @@ func getCover(ctx *web.Context, album string) string {
 	} else if exists(dir + "/folder.jpg") {
 		cover = dir + "/folder.jpg"
 	}
-	//Open the file
-	f, err := os.Open(cover)
-	if err != nil {
-		return "Error reading file!\n"
-	}
 
-	//Get MIME
-	r, err := ioutil.ReadAll(f)
-	if err != nil {
-		return "Error reading file!\n"
-	}
-	mime := http.DetectContentType(r)
+	http.ServeFile(ctx.ResponseWriter, ctx.Request, cover)
 
-	_, err = f.Seek(0, 0)
-	if err != nil {
-		return "Error reading the file\n"
-	}
-	//This is weird - ServeContent supposedly handles MIME setting
-	//But the Webgo content setter needs to be used too
-	//In addition, ServeFile doesn't work, ServeContent has to be used
-	ctx.ContentType(mime)
-	http.ServeContent(ctx.ResponseWriter, ctx.Request, cover, time.Now(), f)
 	return ""
 }
 
 func getSong(ctx *web.Context, song string) string {
 	http.ServeFile(ctx.ResponseWriter, ctx.Request, "static/queue/"+song)
+
 	return ""
 }
 
 func getSearchRes(ctx *web.Context, req string, l *library) string {
 	res := l.asyncSearch(req)
 	jsonMsg, _ := json.Marshal(res)
+
 	return string(jsonMsg)
 }
 
@@ -95,16 +75,19 @@ func getNowPlaying(ctx *web.Context, utaChan chan string, reChan chan string, qu
 	song["listeners"] = strconv.Itoa(listeners)
 
 	jsonMsg, _ := json.Marshal(song)
+
 	return string(jsonMsg)
 }
 
 func getLibrary(ctx *web.Context, subset []mpd.Attrs) string {
 	jsonMsg, _ := json.Marshal(subset)
+
 	return string(jsonMsg)
 }
 
 func getQueue(ctx *web.Context, q *queue, h *hub, utaChan chan string) string {
 	//Let the song handler return a JSONify'd queue
 	jsonMsg, _ := json.Marshal(q.queue)
+
 	return string(jsonMsg)
 }
