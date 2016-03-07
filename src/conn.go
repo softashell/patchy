@@ -36,7 +36,7 @@ func (c *connection) reader() {
 		} else {
 			fmt.Println("Received: ", req)
 			if req["cmd"] == "req" {
-				c.requests <- &request{Title: req["Title"], Album: req["Album"], Artist: req["Artist"]}
+				c.requests <- &request{File: req["File"]}
 			}
 		}
 	}

@@ -217,7 +217,7 @@ function fillSearchRes(data) {
     }
 
     $(".search-results").append(
-      '<div title="' + song["Title"] + '" album="' + song["Album"] + '" artist="' + song["Artist"] + '" class="result">' +
+      '<div file="' + song["file"] + '" class="result">' +
         '<img alt="Album art" src="/art/' + song["Cover"] + '">' +
         '<div>' + 
           '<p><strong>' + title + '</strong>' + ' by <strong>' + artist + '</strong></p>' +
@@ -235,9 +235,7 @@ function fillSearchRes(data) {
     console.log(block)
 
     req["cmd"] = "req"
-    req["Title"] = $(block).attr("title")
-    req["Artist"] = $(block).attr("artist")
-    req["Album"] = $(block).attr("album")
+    req["File"] = $(block).attr("file")
 
     console.log(JSON.stringify(req))
 
@@ -322,16 +320,6 @@ function updateSong() {
             $(".req-button").prop("disabled", false);
         }
     }
-}
-
-function randString() {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for( var i=0; i < 5; i++ )
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
 }
 
 $.fn.textWidth = function(text, font) {

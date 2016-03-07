@@ -90,8 +90,6 @@ func (q *queue) addRandomSongs(count int) []qsong {
 		q.add(&songs[i])
 	}
 
-	_ = "breakpoint"
-
 	return songs
 }
 
@@ -114,7 +112,7 @@ func (q *queue) transcodeNext() {
 	songPath := filepath.Join(musicDir, s.File)
 	s.Transcoded = transcodeSong(songPath)
 
-	fmt.Println("ok", s.Transcoded)
+	fmt.Println("transcode ok", s.Transcoded)
 
 	q.transcoding = false
 }

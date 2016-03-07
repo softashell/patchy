@@ -8,9 +8,7 @@ import (
 )
 
 type request struct {
-	Title  string
-	Album  string
-	Artist string
+	File string
 }
 
 func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q *queue) {
@@ -131,7 +129,7 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 
 func handleRequests(requests chan *request, utaChan chan string, q *queue, l *library, h *hub) {
 	for req := range requests {
-		song, err := l.reqSearch(req.Title, req.Album, req.Artist)
+		song, err := l.reqSearch(req.File)
 		if err != nil {
 			fmt.Println("Couldn't add request error: " + err.Error())
 		} else {

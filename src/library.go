@@ -52,9 +52,10 @@ func (l *library) selection() []mpd.Attrs {
 }
 
 //Searches for a request and returns the first song which matches
-func (l *library) reqSearch(title string, album string, artist string) (*qsong, error) {
+func (l *library) reqSearch(songPath string) (*qsong, error) {
 	for _, song := range l.library {
-		if song["Title"] == title && (song["Album"] == album || song["Artist"] == artist) {
+		if song["file"] == songPath {
+			//if song["Title"] == title && (song["Album"] == album || song["Artist"] == artist) {
 			fmt.Println("Found song: " + song["file"])
 			st, err := strconv.Atoi(song["Time"])
 			if err != nil {
@@ -82,7 +83,7 @@ func (l *library) asyncSearch(req string) []mpd.Attrs {
 		if strings.Contains(title, req) || strings.Contains(album, req) || strings.Contains(artist, req) || strings.Contains(file, req) {
 			song["Cover"] = GetAlbumDir(song["file"])
 			res = append(res, song)
-			if len(res) == 90 {
+			if len(res) == 100 {
 				break
 			}
 		}
