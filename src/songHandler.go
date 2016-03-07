@@ -32,12 +32,21 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 				for q.transcoding {
 				}
 
+				if stalled {
+					// First song was transcoded manually and player is ready to continue
+					stalled = false
+				}
+
 				//Precondition: q.queue has at least 1 item in it.
 				//Consume item in queue, if there's anything left, initiate a transcode
 				ns = q.consume()
 				lastTime = ns.Length
 
-				msg := map[string]string{"cmd": "done"}
+				if ns.Transcoded == "" {
+					fmt.Println("Current song was not transcoded!")
+				}
+
+				msg := map[string]string{"cmd": "done", "File": ns.Transcoded}
 				jsonMsg, _ := json.Marshal(msg)
 				h.broadcast <- []byte(jsonMsg)
 				fmt.Println("Sent done msg to clients")
@@ -54,30 +63,21 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 				go timer(ns.Length, utaChan, ctChan)
 
 				if len(q.queue) > 0 {
-					fmt.Println("Queue has more than one item, performing next transcode in background")
+					fmt.Println("Queue has more one or more items, performing next transcode in background")
 					q.transcoding = true
 					go q.transcodeNext()
 				}
 			}()
 		}
 
-		//Get current song file in use
-		if msg == "cfile" {
-			reChan <- strconv.Itoa(q.CFile)
-		}
-
 		//If a song just finished, load in the next thing from queue if available
 		if msg == "done" {
 			q.playing = false
+			songs := len(q.queue)
 
-			if len(q.queue) > 2 {
-				// We have more than 2 song in queue
-				go func() {
-					utaChan <- "ns"
-				}()
-			} else {
-				if len(q.queue) < 1 {
-					// Player was stopped because it didn't have any songs in queue
+			if songs < 2 {
+				if songs <= 0 {
+					// Player was completely stopped and will not convert next song automatically
 					stalled = true
 				}
 
@@ -91,20 +91,19 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 					h.broadcast <- []byte(jsonMsg)
 				}
 
-				if len(q.queue) >= 1 {
-					if stalled {
-						// Begin transcoding first song
-						q.transcoding = true
-						q.transcodeNext()
+				if len(q.queue) >= 1 && stalled {
+					fmt.Println("Player stalled, transcoding next song manually")
 
-						stalled = false
-					}
-
-					go func() {
-						utaChan <- "ns"
-					}()
+					// Begin transcoding first song
+					q.transcoding = true
+					q.transcodeNext()
 				}
 			}
+
+			// Play next song
+			go func() {
+				utaChan <- "ns"
+			}()
 		}
 
 		if msg == "ctime" {

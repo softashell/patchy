@@ -100,27 +100,22 @@ func getNowPlaying(ctx *web.Context, utaChan chan string, reChan chan string, qu
 		utaChan <- "ctime"
 		ctime := <-reChan
 
-		utaChan <- "cfile"
-		cfile := <-reChan
-
 		song["Title"] = np.Title
 		song["Artist"] = np.Artist
 		song["Album"] = np.Album
-		song["file"] = np.File
 		song["Cover"] = GetAlbumDir(np.File)
 		song["Time"] = strconv.Itoa(np.Length)
+		song["File"] = np.Transcoded
 
 		song["ctime"] = ctime
-		song["cfile"] = cfile
 	} else {
 		song["Title"] = "N/A"
 		song["Artist"] = "N/A"
 		song["Album"] = "N/A"
-		song["file"] = "lol"
 		song["Time"] = "0"
+		song["File"] = ""
 
 		song["ctime"] = "0"
-		song["cfile"] = "1"
 	}
 
 	song["listeners"] = strconv.Itoa(listeners)

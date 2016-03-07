@@ -20,7 +20,6 @@ $(document).ready(function(){
         stime = parseInt(song["Time"])
         $("#curTime").text(secToMin(song["ctime"]))
         ctime = parseInt(song["ctime"])
-        var cfile = parseInt(song["cfile"])
         var listeners = parseInt(song["listeners"])
         $("#nl").text(listeners)
         
@@ -41,7 +40,7 @@ $(document).ready(function(){
           playing = true
           
           $("#player-1").jPlayer("setMedia", {
-            oga: "/queue/ns" + cfile + ".opus?" + randString()
+            oga: song["File"]
           });
 
           $("#player-1").jPlayer("play")
@@ -50,8 +49,6 @@ $(document).ready(function(){
         $("#songProgress").css("width", (100 * parseInt(song["ctime"])/parseInt(song["Time"])).toString() + "%")
 
         songProg = window.setInterval(updateSong, 1000);
-
-        $("#cs").attr("val", cfile)
     });
 
     //Load Library
@@ -84,7 +81,7 @@ $(document).ready(function(){
         var cmd = JSON.parse(evt.data)
         //Update now playing
         if(cmd["cmd"] == "done"){
-            endSong()
+            endSong(cmd)
         }
         //Pause over, start next song
         if(cmd["cmd"] == "NS"){
@@ -186,46 +183,66 @@ $(document).ready(function(){
 
 
 function fillSearchRes(data) {
-    var songs = JSON.parse(data)
-    $(".search-results").empty()
-    $.each(songs, function(index, song) {
-        var title = song["Title"]
-        var artist = song["Artist"]
-        var album = song["Album"]
-        if($.fn.textWidth(song["Title"], "10pt arial") > 130){
-            var i = song["Title"].length-1; 
-            while($.fn.textWidth(song["Title"].substring(0, i) + "...", "10pt arial") > 130){
-                i--;
-            }     
-            title = song["Title"].substring(0,i) + "..."
-        }
-        if($.fn.textWidth("by " + song["Artist"], "10pt arial") > 130){
-            var i = song["Artist"].length-1; 
-            while($.fn.textWidth("by " + song["Artist"].substring(0, i) + "...", "10pt arial") > 130){
-                i--;
-            }     
-            artist = song["Artist"].substring(0,i) + "..."
-        }
-        if($.fn.textWidth("from " + song["Album"], "10pt arial") > 130){
-            var i = song["Album"].length-1; 
-            while($.fn.textWidth("from " + song["Album"].substring(0, i) + "...", "10pt arial") > 130){
-                i--;
-            }     
-            album = song["Album"].substring(0,i) + "..."
-        }
-        $(".search-results").append('<div title="' + song["Title"] + '" album="' + song["Album"] + '" artist="' + song["Artist"] + '" class="result"><img alt="Album art" src="/art/' + song["Cover"] + '"><div><p><strong>' + title + '</strong></p><p>by <strong>' + artist + '</strong></p><p>from <strong>' + album +' </strong></p><button class="req-button btn btn-primary btn-block">Request</button></div></div>')
-    }); 
-    $(".req-button").click(function() {
-            var req = {}
-            var block = $(this).parent().parent()
-            console.log(block)
-            req["cmd"] = "req"
-            req["Title"] = $(block).attr("title")
-            req["Artist"] = $(block).attr("artist")
-            req["Album"] = $(block).attr("album")
-            console.log(JSON.stringify(req))
-            conn.send(JSON.stringify(req))
-    });
+  var songs = JSON.parse(data)
+
+  $(".search-results").empty()
+
+  $.each(songs, function(index, song) {
+    var title = song["Title"]
+    var artist = song["Artist"]
+    var album = song["Album"]
+
+    if($.fn.textWidth(song["Title"], "10pt arial") > 400){
+      var i = song["Title"].length-1; 
+      while($.fn.textWidth(song["Title"].substring(0, i) + "...", "10pt arial") > 400){
+        i--;
+      }     
+      title = song["Title"].substring(0,i) + "..."
+    }
+
+    if($.fn.textWidth("by " + song["Artist"], "10pt arial") > 400){
+      var i = song["Artist"].length-1; 
+      while($.fn.textWidth("by " + song["Artist"].substring(0, i) + "...", "10pt arial") > 400){
+        i--;
+      }     
+      artist = song["Artist"].substring(0,i) + "..."
+    }
+
+    if($.fn.textWidth("from " + song["Album"], "10pt arial") > 400){
+      var i = song["Album"].length-1; 
+      while($.fn.textWidth("from " + song["Album"].substring(0, i) + "...", "10pt arial") > 400){
+        i--;
+      }     
+      album = song["Album"].substring(0,i) + "..."
+    }
+
+    $(".search-results").append(
+      '<div title="' + song["Title"] + '" album="' + song["Album"] + '" artist="' + song["Artist"] + '" class="result">' +
+        '<img alt="Album art" src="/art/' + song["Cover"] + '">' +
+        '<div>' + 
+          '<p><strong>' + title + '</strong>' + ' by <strong>' + artist + '</strong></p>' +
+          '<p>from <strong>' + album +' </strong></p>' +
+        '</div>' +
+        '<button class="req-button btn btn-primary btn-block">Request</button>' +
+      '</div>'
+    )
+  }); 
+
+  $(".req-button").click(function() {
+    var req = {}
+    var block = $(this).parent()
+
+    console.log(block)
+
+    req["cmd"] = "req"
+    req["Title"] = $(block).attr("title")
+    req["Artist"] = $(block).attr("artist")
+    req["Album"] = $(block).attr("album")
+
+    console.log(JSON.stringify(req))
+
+    conn.send(JSON.stringify(req))
+  });
 }
 
 function updateQueue(song) {
@@ -237,24 +254,17 @@ function updateQueue(song) {
     }
 }
 
-function endSong() {
+function endSong(song) {
     $("#player-1").jPlayer("stop")
-
-    var cs = $("#cs").attr("val")
-    if(cs == 1){
-        cs = 2
-    }else{
-        cs = 1
-    }
-    $("#cs").attr("val", cs.toString())
-
-    var cf = "/queue/ns" + cs.toString() + ".opus?" + randString()
-    
+ 
     $("#player-1").jPlayer("clearMedia")
+
     $("#player-1").jPlayer("setMedia", {
-            oga: cf
+            oga: song["File"]
     });
-    console.log("Set Player1 to load song /queue/ns" + cs.toString() + ".opus in the background")
+
+    console.log("Set Player1 to load " + song["File"] + " in the background") 
+
     window.clearInterval(songProg)
 
     $("#curTime").text(secToMin(stime))
@@ -280,8 +290,11 @@ function startSong(song) {
 
     stime = parseInt(song["Time"])
     ctime = 0
+    
     $("#player-1").jPlayer("play")
+
     console.log("Set Player1 to start playing song")
+
     songProg = window.setInterval(updateSong, 1000);
 }
 

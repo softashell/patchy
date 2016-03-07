@@ -94,7 +94,5 @@ func main() {
 }
 
 func startUp() {
-	os.Remove("static/queue/ns1.opus")
-	os.Remove("static/queue/ns2.opus")
-	os.Remove("static/queue/next.opus")
+	clearCache()
 }
