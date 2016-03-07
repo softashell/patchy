@@ -43,7 +43,7 @@ $(document).ready(function(){
             oga: song["File"]
           });
 
-          $("#player-1").jPlayer("play")
+          $("#player-1").jPlayer("play", ctime)
         }
 
         $("#songProgress").css("width", (100 * parseInt(song["ctime"])/parseInt(song["Time"])).toString() + "%")
