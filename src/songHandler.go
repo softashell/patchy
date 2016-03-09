@@ -61,7 +61,7 @@ func handleSongs(utaChan chan string, reChan chan string, l *library, h *hub, q 
 				go timer(ns.Length, utaChan, ctChan)
 
 				if len(q.queue) > 0 {
-					fmt.Println("Queue has more one or more items, performing next transcode in background")
+					fmt.Println("Queue has one or more items, performing next transcode in background")
 					q.transcoding = true
 					go q.transcodeNext()
 				}
