@@ -129,6 +129,11 @@ $(document).ready(function(){
         }
       )
     });
+
+    $("#search-clear").click(function() {
+      $(".search-results").empty()
+    });
+
     /*
     var form = document.getElementById("ulform");
     var fs = document.getElementById("upload-file");
