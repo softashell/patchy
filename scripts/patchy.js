@@ -115,10 +115,19 @@ $(document).ready(function(){
         }
 
     }
-    $("#search-button").click(function() {
-        $.get("/search/" + $("#searchBar").val(), function(data) {
-            fillSearchRes(data)
-        });
+
+    $("#search-form").on("submit", function(event) {
+      event.preventDefault();
+
+      var dat = $(this).serialize();
+
+      $.get(
+        "/search",
+        dat,
+        function(data) {
+          fillSearchRes(data)
+        }
+      )
     });
     /*
     var form = document.getElementById("ulform");

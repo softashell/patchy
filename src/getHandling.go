@@ -86,8 +86,8 @@ func getSong(ctx *web.Context, song string) string {
 	return ""
 }
 
-func getSearchRes(ctx *web.Context, req string, l *library) string {
-	res := l.asyncSearch(req)
+func getSearchRes(ctx *web.Context, l *library) string {
+	res := l.asyncSearch(ctx.Params)
 	jsonMsg, _ := json.Marshal(res)
 
 	return string(jsonMsg)

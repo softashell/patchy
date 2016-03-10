@@ -60,9 +60,9 @@ func main() {
 	//Gets the song -- apparently firefox is a PoS and needs manual header setting
 	web.Get("/queue/(.+)", getSong)
 
-	//Search for songs similar to a given title
-	web.Get("/search/(.*)", func(ctx *web.Context, req string) string {
-		return getSearchRes(ctx, req, l)
+	//Search for songs similar to a given parameters
+	web.Get("/search", func(ctx *web.Context) string {
+		return getSearchRes(ctx, l)
 	})
 
 	//Returns the JSON info for the currently playing song
