@@ -1,89 +1,88 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Patchy</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-        <link rel="stylesheet" href="/css/index.css">
-        <script type="text/javascript" src="/js/jquery.min.js"></script>
-        <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
-        <script type="text/javascript" src="/js/patchy.js"></script>
-    </head>
-    <body>
-        <div class="content">
-            <div class="info">
-                <h1>Patchy</h1>
-                <p>Barely functional online jukebox.</p> 
-                <dl class="dl-horizontal">
-                    <dt>Github</dt>
-                    <dd><a href="https://github.com/softashell/patchy">softashell/patchy</a></dd>
-                </dl>
-                <!--
-                <h3>Upload</h3>
-                <p>If you have permissions:</p>
-                <pre>rsync -rP \
-    your/local/music/ \
-    url.tbd:/var/music/</pre>
-                <p>otherwise:</p>
-                <form id="ulform" class="form">
-                  <input type="file" accept="application/zip" id="upload-file" class="hidden" />
-                  <div id="dropzone" class="drop-target">Drag and drop</div>
-                </form>
-                <p class="text-center" id="droplink" style="margin-top: 10px;"><a href="#">or click here</a></p>
-                <button id="upload-button" class="btn btn-primary btn-block">Upload</button>
-            -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Patchy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/index.css">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2 sidebar">
+          <h2>Patchy <small><a href="https://github.com/softashell/patchy">softashell/patchy</a></small></h2>
+          <h3>Now playing <small>for <span id="nl">0</span> <span id="ltext">listeners</span></small></h3>
+          <div class="now-playing">
+            <img id="npArt" src="image/album.png" alt="Album art" />
+            <p><strong id="npSong">ゆるやかに</strong></p>
+            <p>by <strong id="npArtist">Kikuo</strong></p>
+            <p>from <strong id="npAlbum">きくおミク4</strong></p>
+            <div class="progress">
+              <div id="songProgress" class="progress-bar" style="width: 100%;">
+                <p><strong id="curTime">2:48</strong> / <span id="songTime">2:48</span></p>
+              </div>
             </div>
-            <div class="search">
-                <h1>Request Tunes</h1>
-                <span>
-                    <input id="searchBar" class="form-control" placeholder="Search"/>
-                    <button id="search-button" class="btn btn-primary" aria-label="Left Align">Search</button>
-                </span>
-                <div class="search-results">
-                    <!--
-                    <div class="result"></div><div class="result"></div>
-                    <div class="result"></div><div class="result"></div>
-                    <div class="result"></div><div class="result"></div>
-                    <div class="result"></div><div class="result"></div-->
-                </div>
-            </div>
-            <div class="queue">
-                <div class="padded">
-                    <h3>Now playing <small>for <span id="nl">0</span> <span id="ltext">listeners</span></small></h3>
-                    <div class="now-playing">
-                        <img id="npArt" src="image/album.png" alt="Album art" />
-                        <div>
-                            <p><strong id="npSong">ゆるやかに</strong></p>
-                            <p>by <strong id="npArtist">Kikuo</strong></p>
-                            <p>from <strong id="npAlbum">きくおミク4</strong></p>
-                            <div class="timestamp">
-                                <p><strong id="curTime">1:23</strong> of <span id="songTime">2:48</span></p>
-                                <div class="progress">
-                                    <div id="songProgress" class="progress-bar" style="width: 50%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div> 
-                        <div id="slider"></div>
-                        <span class="volume"></span>
-                    </div>
-                    <h3>Coming up</h3>
-                </div>
-                <div id="queue" class="items">
-                    <!-- Example queue item for reference
-                    <div class="item">
-                        <h4><strong>Everyone's Platinum Disco</strong></h4>
-                        <p>by <strong>BEEEEEES</strong></p>
-                    </div>
-                    -->
-                </div>
-            </div>
+          </div>
+          <div> 
+            <div id="slider"></div>
+            <span class="volume"></span>
+          </div>
         </div>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-        <div id="cs"></div>
-        <div id="player-1" class="jp-jplayer"></div>
-    </body>
+        <div class="col-md-8">
+          <ul class="nav nav-tabs">
+            <li class="active"><a data-target="#queue" data-toggle="tab">Queue</a></li>
+            <li><a data-target="#browse" data-toggle="tab">Browse</a></li>
+            <li><a data-target="#search" data-toggle="tab">Search</a></li>
+            <li><a data-target="#upload" data-toggle="tab">Upload</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active items" id="queue">
+              <!-- Example queue item for reference
+              <div class="item">
+                <h4><strong>Everyone's Platinum Disco</strong></h4>
+                <p>by <strong>BEEEEEES</strong></p>
+              </div>
+              -->
+            </div>
+            <div class="tab-pane" id="browse">
+              <h1>Nothing to see here yet</h1>
+            </div>
+            <div class="tab-pane" id="search">
+              <form role="form" id="search-form">
+                <div class="form-group">
+                  <label for="search-title">Title</label>
+                  <input type="text" class="form-control" id="search-title" name="Title">
+                </div>
+                <div class="form-group">
+                  <label for="search-artist">Artist</label>
+                  <input type="text" class="form-control" id="search-artist" name="Artist">
+                </div>
+                <div class="form-group">
+                  <label for="search-album">Album</label>
+                  <input type="text" class="form-control" id="search-album" name="Album">
+                </div>
+                <div class="form-group">
+                  <label for="search-filename">File</label>
+                  <input type="text" class="form-control" id="search-filename" name="file">
+                </div>
+                <button id="search-button" class="btn btn-primary">Search</button>
+                <input id="search-clear" type="reset" class="btn" value="Clear" />
+              </form>
+              <div class="search-results"></div>
+            </div>
+            <div class="tab-pane" id="upload">
+              <h1>Nothing to see here yet</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="player-1" class="jp-jplayer"></div>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery-ui.min.js"></script>
+    <script src="/js/jquery.jplayer.min.js"></script>
+    <script src="/js/patchy.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  </body>
 </html>

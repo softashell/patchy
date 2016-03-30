@@ -5,6 +5,7 @@ var playing = false
 
 $(document).ready(function(){
     var loc = window.location
+   
     //Initialize Websocket
     conn = new WebSocket("ws://" + loc.host + "/ws");
 
@@ -51,11 +52,6 @@ $(document).ready(function(){
         songProg = window.setInterval(updateSong, 1000);
     });
 
-    //Load Library
-    $.get("/library", function(data) {
-        fillSearchRes(data)
-    });
-
     //Load queue
     $.get("/curQueue", function(data) {
         var songs = JSON.parse(data)
@@ -74,8 +70,10 @@ $(document).ready(function(){
 
     conn.onclose = function(evt) {
         console.log("WS closed")
-        conn = WebSocket("ws://localhost:8080/ws");
+        
+        //conn = new WebSocket("ws://" + loc.host + "/ws");
     }
+
     conn.onmessage = function(evt) {
         console.log(evt.data)
         var cmd = JSON.parse(evt.data)
@@ -322,15 +320,18 @@ function secToMin(seconds){
 }
 
 function updateSong() {
-    if(ctime < stime){
+    if(ctime < stime) {
         ctime++
+
         $("#curTime").text(secToMin(ctime))
+
         $("#songProgress").css("width", (100 * parseInt(ctime)/parseInt(stime)).toString() + "%")
-    }else{
+    } else {
         playing = false
+
         if($(".item").length > 9) {
             $(".req-button").prop("disabled", true);
-        }else{
+        } else {
             $(".req-button").prop("disabled", false);
         }
     }
